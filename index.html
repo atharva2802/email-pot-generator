@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email OTP Verification</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f7f7;
+      padding: 20px;
+    }
+    #registration-form {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      height: 40px;
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      color: #000;
+    }
+    button[type="button"] {
+      width: 100%;
+      height: 40px;
+      margin-bottom: 20px;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button[type="button"]:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    .otp-input {
+      width: 100%;
+      height: 40px;
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      color: #000;
+      display: none; /* Initially hide the OTP input field */
+    }
+  </style>
+</head>
+<body>
+  <!-- Registration Form -->
+  <form id="registration-form">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required><br><br>
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required><br><br>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required><br><br>
+    <label for="confirm-password">Confirm Password:</label>
+    <input type="password" id="confirm-password" name="confirm-password" required><br><br>
+    <button id="sendOTP" class="btn btn-success">Send OTP</button>
+    <input type="number" id="otp-input" class="otp-input" placeholder="Enter OTP" style="display: none;">
+    <button id="verifyOTP" class="btn btn-primary" style="display: none;">Verify OTP</button>
+    <button id="register" class="btn btn-primary" disabled>Register</button>
+  </form>
+
+  <!-- EmailJS library -->
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+  <script>
+    // Initialize EmailJS with your user ID
+    emailjs.init('0oo-YLbMrxiHImI16');
+
+    // Function to generate OTP
+    function generateOTP() {
+      return Math.floor(100000 + Math.random() * 900000); // 6-digit OTP example
+    }
+
+    // Function to send OTP
+    function sendOTP() {
+      const otp = generateOTP();
+      const userEmail = document.getElementById('email').value;
+
+      // Send the OTP via EmailJS
+      emailjs.send('service_7lgl8vo', 'template_adsi54c', {
+        to_email: userEmail,
+        message: `Your OTP is: ${otp}`
+      }).then(function(response) {
+        console.log('Email sent!', response);
+        // Store OTP in session storage
+        sessionStorage.setItem('otp', otp.toString());
+        // Show OTP input field and verify button
+        document.getElementById('otp-input').style.display = 'block';
+        document.getElementById('verifyOTP').style.display = 'block';
+        document.getElementById('verifyOTP').disabled = false;
+      }, function(error) {
+        console.error('Error sending email:', error);
+        alert('Error sending OTP. Please try again later.');
+      });
+    }
+
+    // Function to verify OTP
+    function verifyOTP() {
+      const userInputOTP = document.getElementById('otp-input').value;
+      const storedOTP = sessionStorage.getItem('otp');
+
+      if (userInputOTP === storedOTP) {
+        console.log('OTP verified!');
+        alert("valid OTP.");
+        // Enable register button
+        document.getElementById('register').disabled = false;
+      } else {
+        console.log('Invalid OTP');
+        alert('Invalid OTP. Please enter the correct OTP.');
+      }
+    }
+
+    // Function to register user
+    function registerUser() {
+      const userName = document.getElementById('name').value;
+      const userEmail = document.getElementById('email').value;
+      const userPassword = document.getElementById('password').value;
+
+      // Example: You might want to send this data to a server to handle registration
+      console.log('User registered!', userName, userEmail, userPassword);
+      alert('User registered successfully!');
+      // Optionally, clear form fields after registration
+      document.getElementById('registration-form').reset();
+      // Reset UI after successful registration
+      resetUI();
+    }
+
+    // Reset UI after successful registration
+    function resetUI() {
+      document.getElementById('otp-input').value = '';
+      document.getElementById('otp-input').style.display = 'none';
+      document.getElementById('verifyOTP').style.display = 'none';
+      document.getElementById('verifyOTP').disabled = true;
+      document.getElementById('register').disabled = true;
+    }
+
+    // Attach event listeners
+    document.getElementById('sendOTP').addEventListener('click', function(event) {
+      event.preventDefault();
+      sendOTP();
+    });
+
+    document.getElementById('verifyOTP').addEventListener('click', function(event) {
+      event.preventDefault();
+      verifyOTP();
+    });
+
+    document.getElementById('register').addEventListener('click', function(event) {
+      event.preventDefault();
+      registerUser();
+    });
+  </script>
+</body>
+</html>
